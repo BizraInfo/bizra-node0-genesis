@@ -1,0 +1,448 @@
+/**
+ * BIZRA NODE0 - Dashboard Styles
+ * احسان Standard: Beautiful, Responsive, Accessible
+ */
+
+/* احسان Design Tokens (CSS Custom Properties) */
+:root {
+  /* Colors - احسان Palette */
+  --color-primary: #3498db; /* Trust blue */
+  --color-success: #27ae60; /* Growth green */
+  --color-warning: #f39c12; /* Attention orange */
+  --color-danger: #e74c3c; /* Alert red */
+  --color-info: #9b59b6; /* Insight purple */
+  --color-احسان: #2ecc71; /* Excellence green */
+
+  /* Dark Theme */
+  --bg-dark: #1e1e1e; /* Deep focus */
+  --surface-dark: #2d2d2d; /* Card background */
+  --text-dark: #ecf0f1; /* Clear white */
+  --text-secondary-dark: #95a5a6; /* Muted text */
+  --border-dark: #444;
+
+  /* Light Theme */
+  --bg-light: #f5f6fa;
+  --surface-light: #ffffff;
+  --text-light: #2c3e50;
+  --text-secondary-light: #7f8c8d;
+  --border-light: #dcdde1;
+
+  /* Spacing (احسان: Consistent rhythm) */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Typography (احسان: Clear hierarchy) */
+  --font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+
+  /* Borders & Shadows (احسان: Subtle depth) */
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+  /* Transitions (احسان: Smooth interactions) */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dashboard Container */
+.bizra-dashboard {
+  min-height: 100vh;
+  transition: background-color var(--transition-base);
+}
+
+.bizra-dashboard.theme-dark {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+.bizra-dashboard.theme-light {
+  background-color: var(--bg-light);
+  color: var(--text-light);
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--border-dark);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #5dade2 100%);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+.theme-light .dashboard-header {
+  border-bottom-color: var(--border-light);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.header-left h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin: 0;
+}
+
+.احسان-badge {
+  background: var(--color-احسان);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.theme-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.version {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+/* Grid Layout */
+.layout {
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.grid-item {
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-md);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.theme-dark .grid-item {
+  background: var(--surface-dark);
+  border: 1px solid var(--border-dark);
+}
+
+.theme-light .grid-item {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+}
+
+.grid-item:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Drag Handle (احسان: Clear affordance) */
+.drag-handle {
+  cursor: move;
+  user-select: none;
+  padding: var(--spacing-sm);
+  background: linear-gradient(90deg, var(--color-primary) 0%, transparent 100%);
+  margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md))
+    var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: white;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* Metric Cards */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.metric-card {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--color-info);
+  transition: all var(--transition-fast);
+}
+
+.theme-dark .metric-card {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-light .metric-card {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.metric-card:hover {
+  transform: translateX(4px);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.metric-icon {
+  font-size: var(--font-size-xl);
+}
+
+.metric-header h3 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-unit {
+  font-size: var(--font-size-base);
+  opacity: 0.7;
+  margin-left: var(--spacing-xs);
+}
+
+.sla-indicator {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  display: inline-block;
+}
+
+.sla-indicator.success {
+  background: var(--color-success);
+  color: white;
+}
+
+.sla-indicator.warning {
+  background: var(--color-warning);
+  color: white;
+}
+
+/* Charts */
+.performance-chart,
+.throughput-chart {
+  padding: var(--spacing-md);
+}
+
+.performance-chart h3,
+.throughput-chart h3 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-md);
+  color: inherit;
+}
+
+/* Logs Panel (احسان: Clear, scannable) */
+.logs-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.logs-header h3 {
+  font-size: var(--font-size-lg);
+}
+
+.log-filter {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-dark);
+  font-size: var(--font-size-sm);
+  width: 200px;
+  transition: all var(--transition-fast);
+}
+
+.theme-dark .log-filter {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-dark);
+}
+
+.theme-light .log-filter {
+  background: white;
+  color: var(--text-light);
+  border-color: var(--border-light);
+}
+
+.log-filter:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.logs-content {
+  flex: 1;
+  overflow-y: auto;
+  font-family: "Fira Code", "Consolas", "Monaco", monospace;
+  font-size: var(--font-size-sm);
+  line-height: 1.8;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+}
+
+.theme-dark .logs-content {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.theme-light .logs-content {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.log-entry {
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.log-entry:hover {
+  background: rgba(52, 152, 219, 0.1);
+}
+
+/* Footer */
+.dashboard-footer {
+  text-align: center;
+  padding: var(--spacing-lg);
+  opacity: 0.7;
+  font-size: var(--font-size-sm);
+}
+
+/* Responsive Design (احسان: Accessibility) */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .log-filter {
+    width: 100%;
+  }
+}
+
+/* Accessibility (احسان: Inclusive design) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states (احسان: Keyboard navigation) */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbar Styling (احسان: Beautiful details) */
+.theme-dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.theme-dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark ::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+.theme-dark ::-webkit-scrollbar-thumb:hover {
+  background: #5dade2;
+}
+
+/* Loading States (احسان: Honest feedback) */
+@keyframes احسان-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading {
+  animation: احسان-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Print Styles (احسان: Evidence collection) */
+@media print {
+  .dashboard-header,
+  .dashboard-footer,
+  .theme-toggle,
+  .drag-handle {
+    display: none;
+  }
+
+  .grid-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

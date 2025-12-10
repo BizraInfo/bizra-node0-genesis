@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIZRA Metrics - احسان Performance</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1e1e1e;
+      color: #ecf0f1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #3498db;
+    }
+
+    .metrics-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: #2d2d2d;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 16px;
+      border-left: 4px solid #9b59b6;
+      transition: all 0.25s ease-in-out;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .metric-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .metric-icon {
+      font-size: 20px;
+    }
+
+    .metric-title {
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      font-size: 32px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-unit {
+      font-size: 16px;
+      opacity: 0.7;
+      margin-left: 4px;
+    }
+
+    .sla-indicator {
+      margin-top: 8px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .sla-indicator.success {
+      background: #27ae60;
+      color: white;
+    }
+
+    .sla-indicator.warning {
+      background: #f39c12;
+      color: white;
+    }
+
+    .sla-indicator.danger {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .chart-container {
+      background: #2d2d2d;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #3498db;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+    }
+
+    .refresh-info {
+      text-align: center;
+      opacity: 0.6;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ BIZRA Metrics - احسان Performance</h1>
+
+  <div id="loading" class="loading">Loading metrics...</div>
+
+  <div id="metrics-content" style="display: none;">
+    <div class="metrics-container">
+      <div class="metric-card" id="status-card">
+        <div class="metric-header">
+          <span class="metric-icon">❤️</span>
+          <h3 class="metric-title">Status</h3>
+        </div>
+        <div class="metric-value" id="status-value">-</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-icon">⏱️</span>
+          <h3 class="metric-title">Uptime</h3>
+        </div>
+        <div class="metric-value" id="uptime-value">-</div>
+      </div>
+
+      <div class="metric-card" style="border-left-color: #27ae60;">
+        <div class="metric-header">
+          <span class="metric-icon">⚡</span>
+          <h3 class="metric-title">احسان p95 Latency</h3>
+        </div>
+        <div class="metric-value" id="p95-value">-<span class="metric-unit">ms</span></div>
+        <div class="sla-indicator success" id="p95-sla">-</div>
+      </div>
+
+      <div class="metric-card" style="border-left-color: #f39c12;">
+        <div class="metric-header">
+          <span class="metric-icon">🔥</span>
+          <h3 class="metric-title">p99 Latency</h3>
+        </div>
+        <div class="metric-value" id="p99-value">-<span class="metric-unit">ms</span></div>
+      </div>
+
+      <div class="metric-card" style="border-left-color: #e74c3c;">
+        <div class="metric-header">
+          <span class="metric-icon">🎯</span>
+          <h3 class="metric-title">Error Rate</h3>
+        </div>
+        <div class="metric-value" id="error-value">-<span class="metric-unit">%</span></div>
+      </div>
+
+      <div class="metric-card" style="border-left-color: #3498db;">
+        <div class="metric-header">
+          <span class="metric-icon">📊</span>
+          <h3 class="metric-title">Requests</h3>
+        </div>
+        <div class="metric-value" id="requests-value">-</div>
+      </div>
+
+      <div class="metric-card" style="border-left-color: #e67e22;">
+        <div class="metric-header">
+          <span class="metric-icon">🦀</span>
+          <h3 class="metric-title">Rust PoI</h3>
+        </div>
+        <div class="metric-value" id="rust-value">-</div>
+      </div>
+
+      <div class="metric-card" style="border-left-color: #9b59b6;">
+        <div class="metric-header">
+          <span class="metric-icon">📅</span>
+          <h3 class="metric-title">Last Updated</h3>
+        </div>
+        <div class="metric-value" id="timestamp-value" style="font-size: 16px;">-</div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <h3 class="chart-title">📈 Performance History (Last 30 samples)</h3>
+      <canvas id="performance-chart"></canvas>
+    </div>
+
+    <div class="refresh-info">
+      احسان Standard: Auto-refreshing every 2 seconds | Real-time, honest data
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    // احسان: Performance history tracking
+    const performanceHistory = {
+      timestamps: [],
+      p95: [],
+      p99: [],
+      maxPoints: 30,
+    };
+
+    let chart = null;
+
+    // Initialize Chart.js
+    function initChart() {
+      const ctx = document.getElementById('performance-chart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: performanceHistory.timestamps,
+          datasets: [
+            {
+              label: 'P95 Latency',
+              data: performanceHistory.p95,
+              borderColor: '#27ae60',
+              backgroundColor: 'rgba(39, 174, 96, 0.1)',
+              tension: 0.4,
+              fill: true,
+            },
+            {
+              label: 'P99 Latency',
+              data: performanceHistory.p99,
+              borderColor: '#f39c12',
+              backgroundColor: 'rgba(243, 156, 18, 0.1)',
+              tension: 0.4,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#ecf0f1' },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#ecf0f1' },
+              grid: { color: '#444' },
+              title: {
+                display: true,
+                text: 'Latency (ms)',
+                color: '#ecf0f1',
+              },
+            },
+            x: {
+              ticks: { color: '#ecf0f1' },
+              grid: { color: '#444' },
+            },
+          },
+        },
+      });
+    }
+
+    // Fetch and update metrics
+    async function updateMetrics() {
+      try {
+        const metrics = await window.احسانAPI.fetchMetrics();
+
+        // Update metric cards
+        document.getElementById('status-value').textContent = metrics.status?.toUpperCase() || 'UNKNOWN';
+        document.getElementById('status-card').style.borderLeftColor =
+          metrics.status === 'healthy' ? '#27ae60' : '#e74c3c';
+
+        const uptime = metrics.uptime || 0;
+        const hours = Math.floor(uptime / 3600);
+        const minutes = Math.floor((uptime % 3600) / 60);
+        document.getElementById('uptime-value').textContent = `${hours}h ${minutes}m`;
+
+        const p95 = metrics.p95Latency?.toFixed(1) || '0.0';
+        const p99 = metrics.p99Latency?.toFixed(1) || '0.0';
+        document.getElementById('p95-value').innerHTML = `${p95}<span class="metric-unit">ms</span>`;
+        document.getElementById('p99-value').innerHTML = `${p99}<span class="metric-unit">ms</span>`;
+
+        // احسان SLA indicator
+        const p95Num = parseFloat(p95);
+        const slaIndicator = document.getElementById('p95-sla');
+        if (p95Num < 200) {
+          slaIndicator.textContent = '✅ احسان Excellence';
+          slaIndicator.className = 'sla-indicator success';
+        } else {
+          slaIndicator.textContent = '⚠️ احسان Warning';
+          slaIndicator.className = 'sla-indicator warning';
+        }
+
+        document.getElementById('error-value').innerHTML =
+          `${metrics.errorRate?.toFixed(2) || '0.00'}<span class="metric-unit">%</span>`;
+        document.getElementById('requests-value').textContent =
+          metrics.requests?.toLocaleString() || '0';
+        document.getElementById('rust-value').textContent =
+          metrics.rustEnabled ? 'Enabled' : 'Disabled';
+        document.getElementById('timestamp-value').textContent =
+          new Date(metrics.timestamp).toLocaleTimeString();
+
+        // Update performance history
+        const now = new Date().toLocaleTimeString();
+        performanceHistory.timestamps.push(now);
+        performanceHistory.p95.push(p95Num);
+        performanceHistory.p99.push(parseFloat(p99));
+
+        // Keep only last 30 points
+        if (performanceHistory.timestamps.length > performanceHistory.maxPoints) {
+          performanceHistory.timestamps.shift();
+          performanceHistory.p95.shift();
+          performanceHistory.p99.shift();
+        }
+
+        // Update chart
+        if (chart) {
+          chart.update();
+        }
+
+        // Hide loading, show content
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('metrics-content').style.display = 'block';
+
+      } catch (error) {
+        console.error('Failed to fetch metrics:', error);
+        document.getElementById('loading').textContent =
+          `Error loading metrics: ${error.message}`;
+      }
+    }
+
+    // احسان: Initialize on load
+    window.addEventListener('DOMContentLoaded', async () => {
+      initChart();
+      await updateMetrics();
+
+      // احسان: Auto-refresh every 2 seconds
+      setInterval(updateMetrics, 2000);
+
+      // احسان: Listen for manual refresh events
+      window.احسانAPI.onRefreshMetrics(() => {
+        updateMetrics();
+      });
+    });
+  </script>
+</body>
+</html>

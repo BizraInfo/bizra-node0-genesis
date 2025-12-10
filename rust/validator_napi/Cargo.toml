@@ -1,0 +1,25 @@
+[package]
+name = "validator_napi"
+version = "2.2.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# NAPI-RS framework
+napi = { version = "2.16", features = ["async", "tokio_rt", "serde-json"] }
+napi-derive = "2.16"
+
+# Workspace dependencies
+validator = { path = "../validator" }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+
+# Hex encoding/decoding
+hex = "0.4"
+
+[build-dependencies]
+napi-build = "2.1"

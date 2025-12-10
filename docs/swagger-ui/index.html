@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise API Platform - API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui.css">
+  <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/favicon-32x32.png" sizes="32x32">
+  <style>
+    html {
+      box-sizing: border-box;
+      overflow: -moz-scrollbars-vertical;
+      overflow-y: scroll;
+    }
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .topbar {
+      background-color: #1b1b1b;
+      padding: 10px 0;
+    }
+
+    .topbar-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .topbar-wrapper .link {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .topbar-wrapper .version {
+      color: #fff;
+      font-size: 0.9em;
+      background: #89bf04;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .swagger-ui .topbar {
+      display: none;
+    }
+
+    .custom-header {
+      max-width: 1460px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .custom-header h1 {
+      margin: 0 0 10px 0;
+      color: #3b4151;
+    }
+
+    .custom-header p {
+      margin: 0;
+      color: #3b4151;
+    }
+
+    .environment-selector {
+      max-width: 1460px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .environment-selector select {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .auth-info {
+      max-width: 1460px;
+      margin: 10px auto 20px;
+      padding: 15px 20px;
+      background: #f7f7f7;
+      border-left: 4px solid #89bf04;
+      border-radius: 4px;
+    }
+
+    .auth-info strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #3b4151;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-wrapper">
+      <a class="link" href="/">Enterprise API Platform</a>
+      <span class="version">v1.0.0</span>
+    </div>
+  </div>
+
+  <div class="custom-header">
+    <h1>API Documentation</h1>
+    <p>Comprehensive RESTful API for user management, authentication, and resource access</p>
+  </div>
+
+  <div class="environment-selector">
+    <label for="environment"><strong>Environment:</strong></label>
+    <select id="environment" onchange="changeEnvironment(this.value)">
+      <option value="production">Production (https://api.example.com)</option>
+      <option value="staging">Staging (https://api-staging.example.com)</option>
+      <option value="development" selected>Development (http://localhost:3000)</option>
+    </select>
+  </div>
+
+  <div class="auth-info">
+    <strong>Authentication:</strong>
+    Most endpoints require authentication. Click the "Authorize" button and enter your Bearer token.
+    <br><br>
+    <strong>Quick Start:</strong>
+    1. Use <code>POST /auth/register</code> to create an account<br>
+    2. Use <code>POST /auth/login</code> to get access token<br>
+    3. Click "Authorize" and paste the access token<br>
+    4. Try authenticated endpoints like <code>GET /users</code>
+  </div>
+
+  <div id="swagger-ui"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-standalone-preset.js"></script>
+  <script>
+    const environments = {
+      production: 'https://api.example.com/v1',
+      staging: 'https://api-staging.example.com/v1',
+      development: 'http://localhost:3000/v1'
+    };
+
+    let currentEnvironment = 'development';
+
+    // Initialize Swagger UI
+    function initSwagger(serverUrl) {
+      window.ui = SwaggerUIBundle({
+        url: '../api/openapi.yaml',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        validatorUrl: "https://validator.swagger.io/validator",
+        oauth2RedirectUrl: window.location.origin + "/oauth2-redirect.html",
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        filter: true,
+        tryItOutEnabled: true,
+        syntaxHighlight: {
+          activated: true,
+          theme: "monokai"
+        },
+        onComplete: function() {
+          // Set server based on selected environment
+          window.ui.specActions.updateSpec(JSON.stringify({
+            servers: [{
+              url: serverUrl,
+              description: `${currentEnvironment.charAt(0).toUpperCase() + currentEnvironment.slice(1)} server`
+            }]
+          }));
+
+          // Try to restore saved token
+          const savedToken = localStorage.getItem('swagger_auth_token');
+          if (savedToken) {
+            window.ui.preauthorizeApiKey('BearerAuth', savedToken);
+          }
+        },
+        requestInterceptor: function(request) {
+          // Save bearer token when used
+          if (request.headers && request.headers.Authorization) {
+            const token = request.headers.Authorization.replace('Bearer ', '');
+            localStorage.setItem('swagger_auth_token', token);
+          }
+
+          // Add request logging
+          console.log('API Request:', {
+            method: request.method,
+            url: request.url,
+            headers: request.headers
+          });
+
+          return request;
+        },
+        responseInterceptor: function(response) {
+          // Log response details
+          console.log('API Response:', {
+            status: response.status,
+            statusText: response.statusText,
+            url: response.url,
+            headers: response.headers
+          });
+
+          // Check rate limiting headers
+          if (response.headers['x-ratelimit-remaining']) {
+            const remaining = response.headers['x-ratelimit-remaining'];
+            const limit = response.headers['x-ratelimit-limit'];
+
+            if (parseInt(remaining) < parseInt(limit) * 0.2) {
+              console.warn(`Rate limit warning: ${remaining}/${limit} requests remaining`);
+            }
+          }
+
+          return response;
+        }
+      });
+    }
+
+    // Change environment
+    function changeEnvironment(env) {
+      currentEnvironment = env;
+      const serverUrl = environments[env];
+      initSwagger(serverUrl);
+    }
+
+    // Initialize with development environment
+    window.onload = function() {
+      initSwagger(environments[currentEnvironment]);
+    };
+  </script>
+</body>
+</html>

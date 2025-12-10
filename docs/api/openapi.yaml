@@ -1,0 +1,1066 @@
+openapi: 3.0.3
+info:
+  title: Enterprise API Platform
+  version: 1.0.0
+  description: |
+    # Enterprise API Platform
+
+    Comprehensive RESTful API for enterprise resource management with advanced features including:
+    - Multi-tenant architecture with role-based access control
+    - Real-time event streaming via WebSockets
+    - Advanced search with Elasticsearch integration
+    - Distributed caching with Redis
+    - Async job processing with message queues
+
+    ## Key Features
+    - **Authentication**: OAuth 2.0 + JWT with refresh tokens
+    - **Rate Limiting**: Token bucket algorithm (1000 req/min)
+    - **Versioning**: URI versioning (/v1, /v2)
+    - **Pagination**: Cursor-based with limit/offset support
+    - **Caching**: ETag and Last-Modified headers
+    - **Monitoring**: OpenTelemetry integration
+
+    ## Base URL
+    Production: `https://api.example.com`
+    Staging: `https://api-staging.example.com`
+    Development: `http://localhost:3000`
+
+  contact:
+    name: API Support
+    email: api-support@example.com
+    url: https://support.example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://example.com/terms
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://api-staging.example.com/v1
+    description: Staging server
+  - url: http://localhost:3000/v1
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Users
+    description: User management operations
+  - name: Organizations
+    description: Multi-tenant organization management
+  - name: Projects
+    description: Project and resource management
+  - name: Analytics
+    description: Analytics and reporting
+  - name: Webhooks
+    description: Webhook configuration and management
+  - name: Admin
+    description: Administrative operations
+
+security:
+  - BearerAuth: []
+  - OAuth2: [read, write]
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account with email verification
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              basic:
+                summary: Basic registration
+                value:
+                  email: user@example.com
+                  password: SecureP@ssw0rd
+                  firstName: John
+                  lastName: Doe
+              withOrg:
+                summary: Registration with organization
+                value:
+                  email: admin@company.com
+                  password: SecureP@ssw0rd
+                  firstName: Jane
+                  lastName: Smith
+                  organizationName: ACME Corporation
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                id: usr_1a2b3c4d5e
+                email: user@example.com
+                firstName: John
+                lastName: Doe
+                emailVerified: false
+                createdAt: '2025-01-15T10:30:00Z'
+                organizationId: org_9z8y7x6w5v
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate user
+      description: Login with email and password to receive JWT tokens
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: user@example.com
+              password: SecureP@ssw0rd
+              mfaCode: '123456'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              example:
+                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                refreshToken: rt_a1b2c3d4e5f6g7h8i9j0
+                expiresIn: 3600
+                tokenType: Bearer
+                user:
+                  id: usr_1a2b3c4d5e
+                  email: user@example.com
+                  firstName: John
+                  lastName: Doe
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Exchange refresh token for new access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+            example:
+              refreshToken: rt_a1b2c3d4e5f6g7h8i9j0
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List users
+      description: |
+        Retrieve paginated list of users with filtering and sorting.
+        Supports cursor-based pagination for efficient data retrieval.
+      operationId: listUsers
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: role
+          in: query
+          description: Filter by user role
+          schema:
+            type: string
+            enum: [admin, member, viewer]
+        - name: status
+          in: query
+          description: Filter by account status
+          schema:
+            type: string
+            enum: [active, inactive, suspended]
+        - name: search
+          in: query
+          description: Search by name or email
+          schema:
+            type: string
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortOrder'
+      responses:
+        '200':
+          description: List of users retrieved successfully
+          headers:
+            X-Total-Count:
+              description: Total number of users
+              schema:
+                type: integer
+            X-Rate-Limit-Remaining:
+              $ref: '#/components/headers/X-Rate-Limit-Remaining'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+              example:
+                data:
+                  - id: usr_1a2b3c4d5e
+                    email: user1@example.com
+                    firstName: John
+                    lastName: Doe
+                    role: admin
+                    status: active
+                    createdAt: '2025-01-15T10:30:00Z'
+                  - id: usr_2b3c4d5e6f
+                    email: user2@example.com
+                    firstName: Jane
+                    lastName: Smith
+                    role: member
+                    status: active
+                    createdAt: '2025-01-14T09:20:00Z'
+                pagination:
+                  nextCursor: cur_3c4d5e6f7g
+                  hasMore: true
+                  limit: 20
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags:
+        - Users
+      summary: Create user
+      description: Create a new user (admin only)
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            example:
+              email: newuser@example.com
+              firstName: Alice
+              lastName: Johnson
+              role: member
+              sendInvite: true
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Retrieve detailed information about a specific user
+      operationId: getUserById
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailResponse'
+              example:
+                id: usr_1a2b3c4d5e
+                email: user@example.com
+                firstName: John
+                lastName: Doe
+                role: admin
+                status: active
+                emailVerified: true
+                mfaEnabled: true
+                organizationId: org_9z8y7x6w5v
+                createdAt: '2025-01-15T10:30:00Z'
+                updatedAt: '2025-01-16T14:20:00Z'
+                lastLoginAt: '2025-01-17T08:15:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Users
+      summary: Update user
+      description: Update user profile information
+      operationId: updateUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              firstName: John
+              lastName: Doe-Smith
+              phoneNumber: '+1-555-123-4567'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Soft delete user account (admin only)
+      operationId: deleteUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '204':
+          description: User deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /organizations:
+    get:
+      tags:
+        - Organizations
+      summary: List organizations
+      description: Retrieve list of organizations user has access to
+      operationId: listOrganizations
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Organizations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Organizations
+      summary: Create organization
+      description: Create a new organization
+      operationId: createOrganization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+            example:
+              name: ACME Corporation
+              slug: acme-corp
+              plan: enterprise
+              settings:
+                features:
+                  sso: true
+                  auditLogs: true
+      responses:
+        '201':
+          description: Organization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /organizations/{orgId}/members:
+    get:
+      tags:
+        - Organizations
+      summary: List organization members
+      description: Retrieve all members of an organization
+      operationId: listOrgMembers
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Members retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberListResponse'
+
+  /projects:
+    get:
+      tags:
+        - Projects
+      summary: List projects
+      description: Retrieve paginated list of projects
+      operationId: listProjects
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, archived, draft]
+      responses:
+        '200':
+          description: Projects retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectListResponse'
+
+    post:
+      tags:
+        - Projects
+      summary: Create project
+      description: Create a new project
+      operationId: createProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+
+  /analytics/events:
+    post:
+      tags:
+        - Analytics
+      summary: Track event
+      description: Send analytics event for tracking
+      operationId: trackEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyticsEvent'
+      responses:
+        '202':
+          description: Event accepted for processing
+
+  /webhooks:
+    get:
+      tags:
+        - Webhooks
+      summary: List webhooks
+      description: Retrieve configured webhooks
+      operationId: listWebhooks
+      responses:
+        '200':
+          description: Webhooks retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookListResponse'
+
+    post:
+      tags:
+        - Webhooks
+      summary: Create webhook
+      description: Configure a new webhook endpoint
+      operationId: createWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: Webhook created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from /auth/login
+
+    OAuth2:
+      type: oauth2
+      description: OAuth 2.0 authorization code flow
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.example.com/oauth/authorize
+          tokenUrl: https://api.example.com/oauth/token
+          refreshUrl: https://api.example.com/oauth/refresh
+          scopes:
+            read: Read access to resources
+            write: Write access to resources
+            admin: Administrative access
+
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: Unique user identifier
+      schema:
+        type: string
+        pattern: '^usr_[a-zA-Z0-9]{10}$'
+      example: usr_1a2b3c4d5e
+
+    OrgId:
+      name: orgId
+      in: path
+      required: true
+      description: Organization identifier
+      schema:
+        type: string
+        pattern: '^org_[a-zA-Z0-9]{10}$'
+
+    Limit:
+      name: limit
+      in: query
+      description: Number of items to return (max 100)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    Cursor:
+      name: cursor
+      in: query
+      description: Pagination cursor for next page
+      schema:
+        type: string
+
+    SortBy:
+      name: sortBy
+      in: query
+      description: Field to sort by
+      schema:
+        type: string
+        default: createdAt
+
+    SortOrder:
+      name: sortOrder
+      in: query
+      description: Sort order
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+
+  headers:
+    X-Rate-Limit-Remaining:
+      description: Number of requests remaining in current window
+      schema:
+        type: integer
+      example: 985
+
+    X-Rate-Limit-Reset:
+      description: UTC timestamp when rate limit resets
+      schema:
+        type: integer
+      example: 1642262400
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: Strong password with min 8 characters
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        organizationName:
+          type: string
+          description: Optional organization name to create
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        mfaCode:
+          type: string
+          pattern: '^\d{6}$'
+          description: 6-digit MFA code if enabled
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token (1 hour expiry)
+        refreshToken:
+          type: string
+          description: Refresh token (30 day expiry)
+        expiresIn:
+          type: integer
+          description: Token expiry in seconds
+        tokenType:
+          type: string
+          enum: [Bearer]
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^usr_[a-zA-Z0-9]{10}$'
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [admin, member, viewer]
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        emailVerified:
+          type: boolean
+        organizationId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserResponse'
+        - type: object
+          properties:
+            mfaEnabled:
+              type: boolean
+            lastLoginAt:
+              type: string
+              format: date-time
+            phoneNumber:
+              type: string
+
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - firstName
+        - lastName
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [admin, member, viewer]
+        sendInvite:
+          type: boolean
+          default: true
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+
+    UserListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    OrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        plan:
+          type: string
+          enum: [free, pro, enterprise]
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateOrganizationRequest:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+        plan:
+          type: string
+          enum: [free, pro, enterprise]
+        settings:
+          type: object
+
+    OrganizationListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    MemberListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+
+    ProjectResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, archived, draft]
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateProjectRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          default: draft
+
+    ProjectListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    AnalyticsEvent:
+      type: object
+      required:
+        - eventType
+        - userId
+      properties:
+        eventType:
+          type: string
+        userId:
+          type: string
+        properties:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    WebhookResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+
+    CreateWebhookRequest:
+      type: object
+      required:
+        - url
+        - events
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        secret:
+          type: string
+
+    WebhookListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookResponse'
+
+    PaginationInfo:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+        statusCode:
+          type: integer
+          description: HTTP status code
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        requestId:
+          type: string
+          description: Unique request identifier for debugging
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: ValidationError
+            message: Invalid request parameters
+            statusCode: 400
+            details:
+              - field: email
+                message: Invalid email format
+            requestId: req_abc123xyz
+            timestamp: '2025-01-17T10:30:00Z'
+
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Unauthorized
+            message: Invalid or expired authentication token
+            statusCode: 401
+            requestId: req_def456uvw
+            timestamp: '2025-01-17T10:30:00Z'
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Forbidden
+            message: You do not have permission to access this resource
+            statusCode: 403
+            requestId: req_ghi789rst
+            timestamp: '2025-01-17T10:30:00Z'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: NotFound
+            message: The requested resource was not found
+            statusCode: 404
+            requestId: req_jkl012opq
+            timestamp: '2025-01-17T10:30:00Z'
+
+    Conflict:
+      description: Conflict - resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Conflict
+            message: A user with this email already exists
+            statusCode: 409
+            requestId: req_mno345lmn
+            timestamp: '2025-01-17T10:30:00Z'
+
+    RateLimitExceeded:
+      description: Too many requests
+      headers:
+        X-Rate-Limit-Remaining:
+          $ref: '#/components/headers/X-Rate-Limit-Remaining'
+        X-Rate-Limit-Reset:
+          $ref: '#/components/headers/X-Rate-Limit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: RateLimitExceeded
+            message: Rate limit exceeded. Try again in 60 seconds
+            statusCode: 429
+            requestId: req_pqr678ijk
+            timestamp: '2025-01-17T10:30:00Z'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: InternalServerError
+            message: An unexpected error occurred
+            statusCode: 500
+            requestId: req_stu901fgh
+            timestamp: '2025-01-17T10:30:00Z'

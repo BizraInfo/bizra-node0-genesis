@@ -1,0 +1,595 @@
+{
+  "info": {
+    "name": "Enterprise API Platform",
+    "description": "Comprehensive API collection for Enterprise API Platform with authentication, user management, and organization features.\n\n## Environments\n- Production: https://api.example.com\n- Staging: https://api-staging.example.com\n- Development: http://localhost:3000\n\n## Authentication\nMost endpoints require Bearer token authentication. Use the Authentication folder to obtain tokens.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12345"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.example.com/v1",
+      "type": "string"
+    },
+    {
+      "key": "api_version",
+      "value": "v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User authentication and token management",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data\", () => {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('email');",
+                  "    pm.expect(jsonData).to.have.property('firstName');",
+                  "    pm.expect(jsonData).to.have.property('lastName');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"SecureP@ssw0rd123\",\n  \"firstName\": \"{{$randomFirstName}}\",\n  \"lastName\": \"{{$randomLastName}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Create a new user account with email verification"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has tokens\", () => {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('accessToken');",
+                  "    pm.expect(jsonData).to.have.property('refreshToken');",
+                  "    pm.expect(jsonData).to.have.property('expiresIn');",
+                  "    ",
+                  "    // Save tokens to environment",
+                  "    pm.environment.set('access_token', jsonData.accessToken);",
+                  "    pm.environment.set('refresh_token', jsonData.refreshToken);",
+                  "    ",
+                  "    // Calculate token expiry time",
+                  "    const expiresAt = Date.now() + (jsonData.expiresIn * 1000);",
+                  "    pm.environment.set('token_expires_at', expiresAt);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecureP@ssw0rd123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate user and receive JWT tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has new tokens\", () => {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('accessToken');",
+                  "    pm.expect(jsonData).to.have.property('refreshToken');",
+                  "    ",
+                  "    // Update tokens in environment",
+                  "    pm.environment.set('access_token', jsonData.accessToken);",
+                  "    pm.environment.set('refresh_token', jsonData.refreshToken);",
+                  "    ",
+                  "    const expiresAt = Date.now() + (jsonData.expiresIn * 1000);",
+                  "    pm.environment.set('token_expires_at', expiresAt);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Exchange refresh token for new access token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "User management operations",
+      "item": [
+        {
+          "name": "List Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has pagination\", () => {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData).to.have.property('pagination');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Rate limit headers present\", () => {",
+                  "    pm.expect(pm.response.headers.has('X-RateLimit-Limit')).to.be.true;",
+                  "    pm.expect(pm.response.headers.has('X-RateLimit-Remaining')).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?limit=20&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "admin",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Retrieve paginated list of users with filtering and sorting"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"User has required fields\", () => {",
+                  "    const user = pm.response.json();",
+                  "    pm.expect(user).to.have.property('id');",
+                  "    pm.expect(user).to.have.property('email');",
+                  "    pm.expect(user).to.have.property('role');",
+                  "    pm.expect(user).to.have.property('createdAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            },
+            "description": "Retrieve detailed information about a specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"User created with correct data\", () => {",
+                  "    const user = pm.response.json();",
+                  "    pm.expect(user).to.have.property('id');",
+                  "    pm.expect(user.email).to.exist;",
+                  "    ",
+                  "    // Save user ID for other requests",
+                  "    pm.environment.set('created_user_id', user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{$randomEmail}}\",\n  \"firstName\": \"{{$randomFirstName}}\",\n  \"lastName\": \"{{$randomLastName}}\",\n  \"role\": \"member\",\n  \"sendInvite\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            },
+            "description": "Create a new user (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"User updated successfully\", () => {",
+                  "    const user = pm.response.json();",
+                  "    pm.expect(user).to.have.property('updatedAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            },
+            "description": "Update user profile information"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", () => {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            },
+            "description": "Soft delete user account (admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Organizations",
+      "description": "Multi-tenant organization management",
+      "item": [
+        {
+          "name": "List Organizations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/organizations?limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["organizations"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Retrieve list of organizations user has access to"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Organization",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{$randomCompanyName}}\",\n  \"slug\": \"{{$randomAlphaNumeric}}\",\n  \"plan\": \"pro\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organizations",
+              "host": ["{{base_url}}"],
+              "path": ["organizations"]
+            },
+            "description": "Create a new organization"
+          },
+          "response": []
+        },
+        {
+          "name": "List Organization Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{org_id}}/members",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{org_id}}", "members"]
+            },
+            "description": "Retrieve all members of an organization"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "description": "Project and resource management",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/projects?limit=20&status=active",
+              "host": ["{{base_url}}"],
+              "path": ["projects"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "Retrieve paginated list of projects"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Project\",\n  \"description\": \"Project description\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects",
+              "host": ["{{base_url}}"],
+              "path": ["projects"]
+            },
+            "description": "Create a new project"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh token if expired",
+          "const expiresAt = pm.environment.get('token_expires_at');",
+          "const now = Date.now();",
+          "",
+          "if (expiresAt && now >= expiresAt) {",
+          "    console.log('Token expired, refreshing...');",
+          "    ",
+          "    pm.sendRequest({",
+          "        url: pm.environment.get('base_url') + '/auth/refresh',",
+          "        method: 'POST',",
+          "        header: { 'Content-Type': 'application/json' },",
+          "        body: {",
+          "            mode: 'raw',",
+          "            raw: JSON.stringify({",
+          "                refreshToken: pm.environment.get('refresh_token')",
+          "            })",
+          "        }",
+          "    }, (err, res) => {",
+          "        if (!err && res.code === 200) {",
+          "            const data = res.json();",
+          "            pm.environment.set('access_token', data.accessToken);",
+          "            pm.environment.set('refresh_token', data.refreshToken);",
+          "            pm.environment.set('token_expires_at', Date.now() + (data.expiresIn * 1000));",
+          "            console.log('Token refreshed successfully');",
+          "        } else {",
+          "            console.error('Token refresh failed:', err || res.json());",
+          "        }",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global response validation",
+          "pm.test(\"Response time is acceptable\", () => {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "// Check for rate limit warnings",
+          "if (pm.response.headers.has('X-RateLimit-Remaining')) {",
+          "    const remaining = parseInt(pm.response.headers.get('X-RateLimit-Remaining'));",
+          "    const limit = parseInt(pm.response.headers.get('X-RateLimit-Limit'));",
+          "    ",
+          "    if (remaining < limit * 0.1) {",
+          "        console.warn(`Rate limit warning: ${remaining}/${limit} requests remaining`);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

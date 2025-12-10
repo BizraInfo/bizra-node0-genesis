@@ -1,0 +1,52 @@
+# Copy to .env and adjust values
+
+# Application
+NODE_ENV=production
+PORT=3000
+API_PREFIX=/api/v1
+
+# Security
+JWT_SECRET=change-me-32-characters-minimum-please-1234
+REFRESH_TOKEN_SECRET=change-me-32-characters-minimum-please-5678
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+BCRYPT_ROUNDS=12
+
+# Database
+DATABASE_URL=postgresql://bizra_admin:changeme@localhost:5432/bizra_node0
+DATABASE_POOL_MIN=2
+DATABASE_POOL_MAX=10
+
+# Redis
+REDIS_URL=redis://default:changeme@localhost:6379/0
+REDIS_DB=0
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Cache
+CACHE_TTL_DEFAULT=300
+CACHE_TTL_AUTH=900
+
+# BIZRA Chain
+BIZRA_NODE_URL=https://node.bizra.example
+BIZRA_NETWORK_ID=mainnet
+BIZRA_API_KEY=
+
+# Logging
+LOG_LEVEL=info
+LOG_FORMAT=json
+
+# CORS
+CORS_ORIGIN=*
+CORS_CREDENTIALS=true
+
+# Health
+HEALTH_CHECK_PATH=/health
+READINESS_CHECK_PATH=/ready
+
+# Shutdown
+SHUTDOWN_TIMEOUT_MS=10000
+
+

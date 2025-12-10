@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIZRA Logs - احسان Transparency</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+      background: #1e1e1e;
+      color: #ecf0f1;
+      padding: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #9b59b6;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px 12px;
+      background: #2d2d2d;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #ecf0f1;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.15s ease-in-out;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #9b59b6;
+      box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1);
+    }
+
+    select {
+      padding: 8px 12px;
+      background: #2d2d2d;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #ecf0f1;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #9b59b6;
+    }
+
+    button {
+      padding: 8px 16px;
+      background: #9b59b6;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+    }
+
+    button:hover {
+      background: #8e44ad;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .logs-container {
+      flex: 1;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid transparent;
+      transition: all 0.15s ease-in-out;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .log-entry:hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+
+    .log-timestamp {
+      color: #7f8c8d;
+      margin-right: 8px;
+    }
+
+    .log-level {
+      font-weight: 600;
+      margin-right: 8px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+
+    .log-level.INFO {
+      color: #3498db;
+      background: rgba(52, 152, 219, 0.15);
+    }
+
+    .log-level.SUCCESS {
+      color: #27ae60;
+      background: rgba(39, 174, 96, 0.15);
+    }
+
+    .log-level.WARNING {
+      color: #f39c12;
+      background: rgba(243, 156, 18, 0.15);
+    }
+
+    .log-level.ERROR {
+      color: #e74c3c;
+      background: rgba(231, 76, 60, 0.15);
+    }
+
+    .log-level.DEBUG {
+      color: #95a5a6;
+      background: rgba(149, 165, 166, 0.15);
+    }
+
+    .log-message {
+      color: #ecf0f1;
+    }
+
+    .stats {
+      margin-top: 12px;
+      padding: 12px;
+      background: #2d2d2d;
+      border: 1px solid #444;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-label {
+      opacity: 0.7;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #9b59b6 rgba(255, 255, 255, 0.05);
+    }
+
+    .scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb {
+      background: #9b59b6;
+      border-radius: 4px;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #8e44ad;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      opacity: 0.5;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📋 BIZRA Logs - احسان Transparency</h1>
+    <div class="controls">
+      <input
+        type="text"
+        id="filter-input"
+        placeholder="Filter logs... (احسان: Quick search)"
+      />
+      <select id="level-filter">
+        <option value="ALL">All Levels</option>
+        <option value="INFO">INFO</option>
+        <option value="SUCCESS">SUCCESS</option>
+        <option value="WARNING">WARNING</option>
+        <option value="ERROR">ERROR</option>
+        <option value="DEBUG">DEBUG</option>
+      </select>
+      <button id="clear-btn">Clear</button>
+      <button id="export-btn">Export</button>
+    </div>
+  </header>
+
+  <div class="logs-container scrollbar" id="logs-container">
+    <div class="empty-state">No logs yet. احسان: Waiting for events...</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <span class="stat-label">Total Logs:</span>
+      <span class="stat-value" id="total-logs">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">INFO:</span>
+      <span class="stat-value" style="color: #3498db;" id="info-count">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">SUCCESS:</span>
+      <span class="stat-value" style="color: #27ae60;" id="success-count">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">WARNING:</span>
+      <span class="stat-value" style="color: #f39c12;" id="warning-count">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">ERROR:</span>
+      <span class="stat-value" style="color: #e74c3c;" id="error-count">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Auto-scroll:</span>
+      <span class="stat-value" id="autoscroll-status">ON</span>
+    </div>
+  </div>
+
+  <script>
+    // احسان: Log storage
+    const logs = [];
+    let autoScroll = true;
+    let currentFilter = '';
+    let currentLevelFilter = 'ALL';
+
+    const stats = {
+      INFO: 0,
+      SUCCESS: 0,
+      WARNING: 0,
+      ERROR: 0,
+      DEBUG: 0,
+    };
+
+    // DOM elements
+    const logsContainer = document.getElementById('logs-container');
+    const filterInput = document.getElementById('filter-input');
+    const levelFilter = document.getElementById('level-filter');
+    const clearBtn = document.getElementById('clear-btn');
+    const exportBtn = document.getElementById('export-btn');
+
+    // Add log entry
+    function addLog(level, message) {
+      const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+      const log = {
+        timestamp,
+        level,
+        message,
+      };
+
+      logs.push(log);
+      stats[level] = (stats[level] || 0) + 1;
+
+      renderLogs();
+      updateStats();
+
+      // احسان: Auto-scroll to bottom
+      if (autoScroll) {
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+      }
+    }
+
+    // Render logs with filtering
+    function renderLogs() {
+      const filteredLogs = logs.filter((log) => {
+        const matchesText = currentFilter
+          ? log.message.toLowerCase().includes(currentFilter.toLowerCase())
+          : true;
+        const matchesLevel =
+          currentLevelFilter === 'ALL' || log.level === currentLevelFilter;
+        return matchesText && matchesLevel;
+      });
+
+      if (filteredLogs.length === 0) {
+        logsContainer.innerHTML = '<div class="empty-state">No logs match the current filter. احسان: Try different criteria.</div>';
+        return;
+      }
+
+      logsContainer.innerHTML = filteredLogs
+        .map(
+          (log) => `
+        <div class="log-entry">
+          <span class="log-timestamp">${log.timestamp}</span>
+          <span class="log-level ${log.level}">${log.level}</span>
+          <span class="log-message">${escapeHtml(log.message)}</span>
+        </div>
+      `
+        )
+        .join('');
+    }
+
+    // Update statistics
+    function updateStats() {
+      document.getElementById('total-logs').textContent = logs.length;
+      document.getElementById('info-count').textContent = stats.INFO || 0;
+      document.getElementById('success-count').textContent = stats.SUCCESS || 0;
+      document.getElementById('warning-count').textContent = stats.WARNING || 0;
+      document.getElementById('error-count').textContent = stats.ERROR || 0;
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Event listeners
+    filterInput.addEventListener('input', (e) => {
+      currentFilter = e.target.value;
+      renderLogs();
+    });
+
+    levelFilter.addEventListener('change', (e) => {
+      currentLevelFilter = e.target.value;
+      renderLogs();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Clear all logs? احسان: This action cannot be undone.')) {
+        logs.length = 0;
+        Object.keys(stats).forEach((key) => (stats[key] = 0));
+        renderLogs();
+        updateStats();
+      }
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const exportData = logs.map((log) => `${log.timestamp} [${log.level}] ${log.message}`).join('\n');
+      const blob = new Blob([exportData], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bizra-logs-${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Detect manual scroll (disable auto-scroll)
+    logsContainer.addEventListener('scroll', () => {
+      const isAtBottom =
+        logsContainer.scrollHeight - logsContainer.scrollTop <= logsContainer.clientHeight + 50;
+      autoScroll = isAtBottom;
+      document.getElementById('autoscroll-status').textContent = autoScroll ? 'ON' : 'OFF';
+    });
+
+    // احسان: Simulate log generation (replace with WebSocket in production)
+    function simulateLogs() {
+      const levels = ['INFO', 'SUCCESS', 'WARNING', 'ERROR', 'DEBUG'];
+      const messages = [
+        'API request processed successfully',
+        'Metrics updated for احسان SLA validation',
+        'Rust PoI verification completed',
+        'Database connection established',
+        'Health check passed',
+        'Warning: High memory usage detected',
+        'Error: Failed to connect to external service',
+        'Debug: Processing batch of 100 requests',
+        'User authentication successful',
+        'Cache invalidated for stale data',
+        'احسان Standard: p95 latency within SLA',
+        'Blockchain sync in progress',
+        'Genesis block validated',
+      ];
+
+      setInterval(() => {
+        const level = levels[Math.floor(Math.random() * levels.length)];
+        const message = messages[Math.floor(Math.random() * messages.length)];
+        addLog(level, message);
+      }, 2000 + Math.random() * 3000); // Random interval 2-5 seconds
+    }
+
+    // احسان: Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      addLog('INFO', 'BIZRA Logs viewer initialized');
+      addLog('SUCCESS', 'احسان Standard: Clear, Honest, Beautiful, Respectful');
+      simulateLogs();
+    });
+  </script>
+</body>
+</html>

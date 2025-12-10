@@ -1,0 +1,63 @@
+[package]
+name = "bizra-network"
+version = "0.1.0"
+edition = "2021"
+authors = ["BIZRA First Architect (MoMo)"]
+description = "BIZRA P2P Network Layer - libp2p + QUIC + Kademlia DHT"
+
+[dependencies]
+# P2P Networking (libp2p ecosystem)
+libp2p = { version = "0.53", features = [
+    "tcp",
+    "quic",
+    "noise",
+    "yamux",
+    "gossipsub",
+    "kad",
+    "mdns",
+    "identify",
+    "ping",
+    "macros",
+    "tokio",
+] }
+
+# Individual protocols
+libp2p-gossipsub = "0.46"
+libp2p-kad = "0.46"
+libp2p-mdns = "0.46"
+libp2p-identify = "0.46"
+libp2p-ping = "0.44"
+
+# Async runtime
+tokio = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+bincode = { workspace = true }
+
+# Cryptography (for peer identity)
+ed25519-dalek = "2.1.0"
+blake3 = "1.5"
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Metrics
+metrics = { workspace = true }
+
+# Utilities
+chrono = { workspace = true }
+futures = "0.3"
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[lib]
+name = "bizra_network"
+path = "src/lib.rs"

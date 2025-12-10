@@ -1,0 +1,96 @@
+# ====================================================================
+# Rust Build Configuration - Peak Performance Optimization
+# احسان Standard: Professional compiler optimization settings
+# ====================================================================
+
+[build]
+# Enable incremental compilation for faster rebuilds (60-80% faster)
+incremental = true
+
+# Use all available CPU cores for parallel compilation
+# jobs = 0  # 0 = auto-detect and use all cores (temporarily disabled)
+
+# Base rustflags (warnings as errors for quality)
+rustflags = ["-Dwarnings"]
+
+# Target-specific optimizations
+[target.x86_64-pc-windows-msvc]
+rustflags = [
+    "-Dwarnings",
+    "-C", "target-cpu=native",           # Optimize for native CPU architecture
+]
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+    "-Dwarnings",
+    "-C", "target-cpu=native",
+]
+
+[target.x86_64-apple-darwin]
+rustflags = [
+    "-Dwarnings",
+    "-C", "target-cpu=native",
+]
+
+# Profile configurations
+[profile.dev]
+# Development profile - fast compilation, good debugging
+opt-level = 0
+debug = true
+incremental = true
+codegen-units = 256  # Maximum parallelism for fast dev builds
+
+[profile.release]
+# Production profile - maximum performance and optimization
+opt-level = 3
+debug = false
+lto = "thin"         # Thin link-time optimization (balance speed/optimization)
+codegen-units = 16   # Balance between compilation speed and optimization
+panic = "unwind"     # Allow tests to run (use "abort" for production)
+strip = false        # Keep symbols for debugging production issues
+overflow-checks = false
+incremental = false  # Disable for reproducible builds
+
+[profile.release-production]
+# Dedicated production build profile (use with --profile release-production)
+inherits = "release"
+opt-level = 3
+lto = "fat"          # Maximum link-time optimization
+codegen-units = 1    # Single codegen unit for best optimization
+panic = "abort"      # Smaller binary size, no unwinding
+strip = true         # Strip symbols for minimal size
+
+[profile.bench]
+# Benchmarking profile - maximum performance
+opt-level = 3
+debug = false
+lto = "thin"
+codegen-units = 1
+overflow-checks = false
+
+[profile.test]
+# Test profile - optimized tests run faster
+opt-level = 1        # Basic optimization for faster test execution
+debug = true
+incremental = true
+
+# Cargo settings
+[cargo-new]
+vcs = "git"
+
+# Network settings for faster dependency fetching
+[net]
+git-fetch-with-cli = false
+offline = false
+retry = 3
+
+# Use sparse registry protocol (faster index updates)
+[registries.crates-io]
+protocol = "sparse"
+
+# Terminal settings
+[term]
+verbose = false
+color = "auto"
+progress.when = "auto"
+progress.width = 80
