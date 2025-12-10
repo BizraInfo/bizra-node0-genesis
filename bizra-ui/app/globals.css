@@ -1,0 +1,827 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to BIZRA brand color palette with dark navy/indigo backgrounds and gold highlights */
+  --background: #0b1420; /* ink-900: Ultra-deep navy for primary fields */
+  --foreground: #ffffff; /* white: Body copy on dark backgrounds */
+  --card: #12121a; /* ink-800: Secondary dark surfaces */
+  --card-foreground: #ffffff;
+  --popover: #1a1a2e; /* indigo-800: Gradients & overlays */
+  --popover-foreground: #ffffff;
+  --primary: #d4af37; /* gold-500: Primary highlight & outlines */
+  --primary-foreground: #0b1420;
+  --secondary: #1a1a2e; /* indigo-800 for secondary elements */
+  --secondary-foreground: #e5c687; /* gold-300: Secondary highlight & text */
+  --muted: #12121a; /* ink-800 for muted backgrounds */
+  --muted-foreground: #e5c687; /* gold-300 for muted text */
+  --accent: #18b4c3; /* teal-400: Accent for data & diagrams */
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.55 0.15 25);
+  --destructive-foreground: #ffffff;
+  --border: #d4af37; /* gold-500 for borders */
+  --input: #12121a; /* ink-800 for inputs */
+  --ring: #d4af37; /* gold-500 for focus rings */
+  --chart-1: #d4af37; /* gold-500 */
+  --chart-2: #18b4c3; /* teal-400 */
+  --chart-3: #e5c687; /* gold-300 */
+  --chart-4: #1a1a2e; /* indigo-800 */
+  --chart-5: #12121a; /* ink-800 */
+  --radius: 0.75rem;
+  --sidebar: #12121a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #d4af37;
+  --sidebar-primary-foreground: #0b1420;
+  --sidebar-accent: #1a1a2e;
+  --sidebar-accent-foreground: #e5c687;
+  --sidebar-border: #d4af37;
+  --sidebar-ring: #d4af37;
+}
+
+.dark {
+  /* Dark mode uses same BIZRA colors since the brand is inherently dark */
+  --background: #0b1420;
+  --foreground: #ffffff;
+  --card: #12121a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a2e;
+  --popover-foreground: #ffffff;
+  --primary: #d4af37;
+  --primary-foreground: #0b1420;
+  --secondary: #1a1a2e;
+  --secondary-foreground: #e5c687;
+  --muted: #12121a;
+  --muted-foreground: #e5c687;
+  --accent: #18b4c3;
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.45 0.15 25);
+  --destructive-foreground: #ffffff;
+  --border: #d4af37;
+  --input: #12121a;
+  --ring: #d4af37;
+  --chart-1: #d4af37;
+  --chart-2: #18b4c3;
+  --chart-3: #e5c687;
+  --chart-4: #1a1a2e;
+  --chart-5: #12121a;
+  --sidebar: #12121a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #d4af37;
+  --sidebar-primary-foreground: #0b1420;
+  --sidebar-accent: #1a1a2e;
+  --sidebar-accent-foreground: #e5c687;
+  --sidebar-border: #d4af37;
+  --sidebar-ring: #d4af37;
+}
+
+@theme inline {
+  /* Updated font configuration to include BIZRA typography with system font fallbacks */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* BIZRA OS Custom Animations */
+@keyframes rotate-sacred {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes pulse-gold {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(212, 175, 55, 0);
+  }
+}
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
+
+/* Added BIZRA-specific animations with sacred geometry and deceleration easing */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes seedGrow {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes goldenSpiral {
+  from {
+    transform: rotate(0deg) scale(0.9);
+    opacity: 0.5;
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-seed-grow {
+  animation: seedGrow 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-golden-spiral {
+  animation: goldenSpiral 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+/* Added sacred geometry background patterns */
+.seed-of-life-bg {
+  background-image: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.flower-of-life-pattern {
+  background-image: radial-gradient(circle at 30% 30%, rgba(212, 175, 55, 0.05) 20px, transparent 20px),
+    radial-gradient(circle at 70% 30%, rgba(212, 175, 55, 0.05) 20px, transparent 20px),
+    radial-gradient(circle at 50% 70%, rgba(212, 175, 55, 0.05) 20px, transparent 20px);
+  background-size: 120px 120px;
+}
+
+/* Terminal Landing Page Styles */
+@keyframes rotate-sacred {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(212, 175, 55, 0);
+  }
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.loading {
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Glass morphism effects */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #D4AF37;
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15);
+}
+
+/* Sacred geometry overlay */
+.sacred-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.08;
+}
+
+.flower-of-life {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  animation: rotate-sacred 120s linear infinite;
+}
+
+/* Navigation styles */
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.logo-main {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #D4AF37;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.logo-arabic {
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.2rem;
+}
+
+.nav-cta {
+  background: #D4AF37;
+  color: #0A1828;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid #D4AF37;
+}
+
+.nav-cta:hover {
+  background: transparent;
+  color: #D4AF37;
+  transform: scale(1.05);
+}
+
+/* Hero section */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 2rem 4rem;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid #D4AF37;
+  color: #D4AF37;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  animation: pulse-gold 3s ease-in-out infinite;
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #FFFFFF, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 3rem;
+  font-weight: 300;
+}
+
+.hero-cta-group {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: #D4AF37;
+  color: #0A1828;
+  padding: 1.2rem 3rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid #D4AF37;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: #D4AF37;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 1.2rem 3rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.btn-secondary:hover {
+  border-color: #D4AF37;
+  color: #D4AF37;
+  transform: translateY(-3px);
+}
+
+/* Section styles */
+section {
+  padding: 6rem 2rem;
+  position: relative;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-badge {
+  display: inline-block;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid #D4AF37;
+  color: #D4AF37;
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #FFFFFF;
+}
+
+.section-subtitle {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Grid layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* Problem section */
+.crisis-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 2rem;
+}
+
+.stat-number {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #D4AF37;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* Solution cards */
+.solution-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 1.5rem;
+}
+
+.solution-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: #D4AF37;
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.solution-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #FFFFFF;
+}
+
+.solution-description {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.8;
+}
+
+/* Proof section */
+.proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.proof-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.proof-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.proof-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: #D4AF37;
+  fill: none;
+  stroke-width: 2;
+}
+
+.proof-content h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #FFFFFF;
+}
+
+.proof-content p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.genesis-hash {
+  font-family: 'Courier New', monospace;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid #D4AF37;
+  padding: 1rem;
+  border-radius: 10px;
+  word-break: break-all;
+  font-size: 0.85rem;
+  color: #D4AF37;
+  margin-top: 0.5rem;
+}
+
+/* Chart container */
+.chart-container {
+  position: relative;
+  height: 400px;
+  margin: 3rem 0;
+}
+
+/* Alpha-100 section */
+.alpha-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.benefit-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.benefit-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: #D4AF37;
+  fill: none;
+  stroke-width: 2;
+}
+
+.benefit-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+}
+
+/* Form section */
+.form-container {
+  max-width: 600px;
+  margin: 3rem auto 0;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #D4AF37;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-submit {
+  width: 100%;
+  background: #D4AF37;
+  color: #0A1828;
+  padding: 1.2rem;
+  border: 2px solid #D4AF37;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form-submit:hover:not(:disabled) {
+  background: transparent;
+  color: #D4AF37;
+  transform: translateY(-2px);
+}
+
+.form-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Validation message */
+.validation-message {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-height: 20px;
+  transition: all 0.3s ease;
+}
+
+/* Footer */
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-logo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #D4AF37;
+  margin-bottom: 1rem;
+}
+
+.footer-tagline {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #D4AF37;
+}
+
+.footer-copyright {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 1rem;
+  }
+
+  .logo-main {
+    font-size: 1.5rem;
+  }
+
+  .nav-cta {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .hero {
+    padding: 6rem 1rem 3rem;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  section {
+    padding: 4rem 1rem;
+  }
+
+  .glass-card {
+    padding: 1.5rem;
+  }
+
+  .flower-of-life {
+    width: 400px;
+    height: 400px;
+  }
+}

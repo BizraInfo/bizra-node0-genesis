@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BLOCKCHAIN_API_URL=${BLOCKCHAIN_API_URL:-http://blockchain-api:3006}
+    networks:
+      - bizra-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  blockchain-api:
+    image: node:20-alpine
+    working_dir: /app
+    command: node node0/bizra_validation_api.js
+    ports:
+      - "3006:3006"
+    volumes:
+      - ../BIZRA-OS-main:/app
+    networks:
+      - bizra-network
+    restart: unless-stopped
+
+networks:
+  bizra-network:
+    driver: bridge
+
