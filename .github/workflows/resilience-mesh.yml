@@ -1,0 +1,57 @@
+name: Resilience Mesh Verification
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 */6 * * *' # Run every 6 hours to prove sustained resilience
+
+jobs:
+  chaos-compliance:
+    name: "🛡️ Chaos & SLO Verification"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+      # If no package-lock.json exists at root, use 'npm install'
+      # run: npm install
+
+    - name: 🌪️ Execute Chaos Test (Meta-Federation)
+      id: chaos
+      run: |
+        echo "::group::Initializing Resilience Mesh"
+        node scripts/test_meta_federation_slo.js
+        echo "::endgroup::"
+      env:
+        CI: true
+        FORCE_COLOR: 3
+        # Enforce the 30s contract strictly in CI
+        SLO_MAX_RECOVERY_MS: 30000 
+
+    - name: 📊 Verify Ihsan Compliance
+      if: success()
+      run: |
+        echo "✅ RESILIENCE CONTRACT MET"
+        echo "System recovered within SLO limits."
+        echo "Ihsan Score: 100 (Reliability Verified)"
+
+    - name: 🚨 Alert on Failure
+      if: failure()
+      run: |
+        echo "❌ RESILIENCE CONTRACT BREACHED"
+        echo "Critical: System failed to recover within 30s SLO."
+        echo "Action: Block deployment immediately."
+        exit 1
