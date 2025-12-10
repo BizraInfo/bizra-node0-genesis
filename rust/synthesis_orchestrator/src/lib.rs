@@ -82,7 +82,7 @@ pub use ihsan_gate::IhsanGate;
 pub use routing::{RoutingEngine, RoutingStrategy};
 pub use consensus::{ConsensusEngine, ConsensusStrategy};
 pub use trust_bridge::TrustBridge;
-pub use telemetry::Telemetry;
+pub use types::Telemetry;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};

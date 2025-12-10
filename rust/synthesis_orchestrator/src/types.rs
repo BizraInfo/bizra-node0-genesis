@@ -286,39 +286,7 @@ pub struct Telemetry {
     pub performance: PerformanceMetrics,
 }
 
-impl Telemetry {
-    /// Create telemetry from synthesis results
-    pub fn new(
-        winner: &Candidate,
-        candidates: &[ScoredCandidate],
-        elapsed: std::time::Duration,
-    ) -> Self {
-        let json_compliance_rate = candidates
-            .iter()
-            .filter(|c| c.scores.accuracy > 0.8)
-            .count() as f32
-            / candidates.len() as f32;
         
-        let avg_accuracy: f32 = candidates
-            .iter()
-            .map(|c| c.scores.accuracy)
-            .sum::<f32>()
-            / candidates.len() as f32;
-        
-        Self {
-            sli_metrics: Sli {
-                json_compliance_rate,
-            },
-            quality_metrics: Quality {
-                accuracy_uplift: winner.scores.accuracy - avg_accuracy,
-            },
-            performance: PerformanceMetrics {
-                latency_ms: elapsed.as_millis() as u32,
-                candidates_generated: candidates.len(),
-            },
-        }
-    }
-}
 
 /// Service Level Indicators
 #[derive(Debug, Clone, Serialize, Deserialize)]

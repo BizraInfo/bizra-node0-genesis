@@ -15,7 +15,7 @@ use cfg_if::cfg_if;
 
 cfg_if! {
     if #[cfg(feature = "simd")] {
-        use simd_json::BorrowedValue;
+        use simd_json::OwnedValue;
         
         /// JSON parser with SIMD acceleration
         pub struct EarlyCloseJsonParser;
@@ -34,7 +34,7 @@ cfg_if! {
             /// - Invalid JSON syntax
             /// - Malformed UTF-8
             /// - Unbalanced braces/brackets
-            pub fn parse_balanced_json(bytes: &[u8]) -> Result<BorrowedValue<'_>, ParseError> {
+            pub fn parse_balanced_json(bytes: &[u8]) -> Result<OwnedValue, ParseError> {
                 // Create mutable copy for simd-json (it needs &mut [u8])
                 let mut buf = bytes.to_vec();
                 
@@ -42,7 +42,7 @@ cfg_if! {
                 Self::strip_bom(&mut buf);
                 
                 // Parse with SIMD acceleration
-                simd_json::to_borrowed_value(&mut buf).map_err(ParseError::SimdJson)
+                simd_json::to_owned_value(&mut buf).map_err(ParseError::SimdJson)
             }
 
             /// Strip UTF-8 BOM from buffer if present
@@ -63,16 +63,11 @@ cfg_if! {
                 let mut buf = s.as_bytes().to_vec();
                 Self::strip_bom(&mut buf);
                 
-                let borrowed = simd_json::to_borrowed_value(&mut buf)?;
-                Ok(Self::borrowed_to_owned(&borrowed))
-            }
-
-            /// Convert BorrowedValue to owned Value
-            fn borrowed_to_owned(borrowed: &BorrowedValue<'_>) -> serde_json::Value {
-                // simd-json's BorrowedValue can be converted to serde_json::Value
-                serde_json::to_value(borrowed).unwrap_or(serde_json::Value::Null)
+                let owned = simd_json::to_owned_value(&mut buf)?;
+                serde_json::to_value(owned).map_err(|e| ParseError::SimdJson(simd_json::Error::generic(simd_json::ErrorType::Serde(e.to_string()))))
             }
         }
+
 
         #[cfg(test)]
         mod tests {

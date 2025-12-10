@@ -19,7 +19,7 @@
 //! ```
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use blake3::hash as blake3_hash;
 use anyhow::{Result, bail};
 
@@ -114,10 +114,10 @@ pub struct Evidence {
 pub struct Measurement {
     /// Dimension scores (0.0 - 1.0)
     /// Common dimensions: quality, utility, efficiency, trust, fairness, diversity
-    pub dimensions: HashMap<String, f64>,
+    pub dimensions: BTreeMap<String, f64>,
 
     /// Weights for dimensions (must sum to ~1.0)
-    pub weights: HashMap<String, f64>,
+    pub weights: BTreeMap<String, f64>,
 
     /// Computed impact score (weighted sum of dimensions)
     pub impact_score: f64,
@@ -129,10 +129,10 @@ pub struct Measurement {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Benchmarks {
     /// Pre-contribution performance metrics
-    pub pre: HashMap<String, f64>,
+    pub pre: BTreeMap<String, f64>,
 
     /// Post-contribution performance metrics
-    pub post: HashMap<String, f64>,
+    pub post: BTreeMap<String, f64>,
 
     /// Delta (improvement) value
     pub delta: f64,
@@ -418,14 +418,14 @@ mod tests {
     }
 
     fn test_measurement() -> Measurement {
-        let mut dimensions = HashMap::new();
+        let mut dimensions = BTreeMap::new();
         dimensions.insert("quality".to_string(), 0.92);
         dimensions.insert("utility".to_string(), 0.88);
         dimensions.insert("efficiency".to_string(), 0.86);
         dimensions.insert("trust".to_string(), 0.94);
         dimensions.insert("diversity".to_string(), 0.70);
 
-        let mut weights = HashMap::new();
+        let mut weights = BTreeMap::new();
         weights.insert("quality".to_string(), 0.28);
         weights.insert("utility".to_string(), 0.28);
         weights.insert("efficiency".to_string(), 0.16);
@@ -581,10 +581,10 @@ mod tests {
     fn test_benchmarks_delta_validation() {
         let mut attestation = test_attestation();
 
-        let mut pre = HashMap::new();
+        let mut pre = BTreeMap::new();
         pre.insert("performance".to_string(), 0.512);
 
-        let mut post = HashMap::new();
+        let mut post = BTreeMap::new();
         post.insert("performance".to_string(), 0.840);
 
         attestation.benchmarks = Some(Benchmarks {
@@ -601,10 +601,10 @@ mod tests {
     fn test_benchmarks_delta_mismatch() {
         let mut attestation = test_attestation();
 
-        let mut pre = HashMap::new();
+        let mut pre = BTreeMap::new();
         pre.insert("performance".to_string(), 0.512);
 
-        let mut post = HashMap::new();
+        let mut post = BTreeMap::new();
         post.insert("performance".to_string(), 0.840);
 
         attestation.benchmarks = Some(Benchmarks {

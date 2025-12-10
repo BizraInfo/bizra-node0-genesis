@@ -66,6 +66,7 @@ opentelemetry = { version = "0.21", optional = true }
 
 # Utilities
 cfg-if = "1.0"
+hex = "0.4"
 chrono = { workspace = true }
 
 [dev-dependencies]
