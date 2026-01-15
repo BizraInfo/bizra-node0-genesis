@@ -32,6 +32,8 @@ const roles = [];
 const permissions = [];
 
 // AFTER:
+// Note: Verify that this.repository.getUserById() exists in AuthService
+// and returns user object with email, roles, permissions properties
 const user = await this.repository.getUserById(decoded.userId);
 const email = user.email;
 const roles = user.roles;
